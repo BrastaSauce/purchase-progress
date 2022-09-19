@@ -44,4 +44,16 @@ class PurchaseProgressItem
     @Getter
     @Setter
     private int gePrice;
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof PurchaseProgressItem))
+        {
+            return false;
+        }
+
+        final PurchaseProgressItem item = (PurchaseProgressItem) obj;
+        return item.getItemId() == this.itemId;
+    }
 }

@@ -139,7 +139,7 @@ public class PurchaseProgressPlugin extends Plugin
 			unit = ChronoUnit.MINUTES,
 			asynchronous = true
 	)
-	public void updateItemPrices()
+	private void updateItemPrices()
 	{
 		clientThread.invokeLater(() ->
 		{
@@ -154,15 +154,7 @@ public class PurchaseProgressPlugin extends Plugin
 
 	private boolean containsItem(PurchaseProgressItem newItem)
 	{
-		for (PurchaseProgressItem item : items)
-		{
-			if (item.getItemId() == newItem.getItemId())
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return items.contains(newItem);
 	}
 
 	@Override
