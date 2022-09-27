@@ -136,20 +136,16 @@ public class PurchaseProgressPlugin extends Plugin
 
 	@Schedule(
 			period = 5,
-			unit = ChronoUnit.MINUTES,
-			asynchronous = true
+			unit = ChronoUnit.MINUTES
 	)
-	private void updateItemPrices()
+	public void updateItemPrices()
 	{
-		clientThread.invokeLater(() ->
+		for (PurchaseProgressItem item : items)
 		{
-			for (PurchaseProgressItem item : items)
-			{
-				item.setGePrice(itemManager.getItemPrice(item.getItemId()));
-			}
+			item.setGePrice(itemManager.getItemPrice(item.getItemId()));
+		}
 
-			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
-		});
+		SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
 	}
 
 	private boolean containsItem(PurchaseProgressItem newItem)
