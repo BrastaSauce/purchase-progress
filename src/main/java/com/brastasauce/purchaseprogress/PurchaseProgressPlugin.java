@@ -24,6 +24,9 @@
  */
 package com.brastasauce.purchaseprogress;
 
+import com.brastasauce.purchaseprogress.data.PurchaseProgressDataManager;
+import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
+import com.brastasauce.purchaseprogress.ui.PurchaseProgressPluginPanel;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 

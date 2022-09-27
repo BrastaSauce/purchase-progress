@@ -22,8 +22,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.brastasauce.purchaseprogress;
+package com.brastasauce.purchaseprogress.ui;
 
+import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
+import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
 import com.google.inject.Inject;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.RuneLiteConfig;
