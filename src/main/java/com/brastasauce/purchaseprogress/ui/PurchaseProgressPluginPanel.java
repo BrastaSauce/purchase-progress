@@ -449,6 +449,9 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         {
             value.setText("Value: " + QuantityFormatter.formatNumber(plugin.getValue()) + " gp");
         }
+
+        // Hide sort button if no items
+        sortButton.setVisible(!plugin.getItems().isEmpty());
     }
 
     public void containsItemWarning()
