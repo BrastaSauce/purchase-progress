@@ -117,6 +117,7 @@ public class PurchaseProgressItemPanel extends JPanel
         deletePanel.setBackground(new Color(0, 0, 0, 0));
 
         JLabel deleteItem = new JLabel(DELETE_ICON);
+        deleteItem.setBorder(new EmptyBorder(0, 15, 0, 0));
         deleteItem.addMouseListener(new MouseAdapter()
         {
             @Override
