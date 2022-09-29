@@ -54,6 +54,7 @@ import net.runelite.client.util.ImageUtil;
 import java.awt.image.BufferedImage;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -149,6 +150,26 @@ public class PurchaseProgressPlugin extends Plugin
 		}
 
 		SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+	}
+
+	public void sort(boolean sortAscending)
+	{
+		clientThread.invokeLater(() -> {
+			if (!items.isEmpty())
+			{
+				if (sortAscending)
+				{
+					items.sort(Comparator.naturalOrder());
+				}
+				else
+				{
+					items.sort(Comparator.reverseOrder());
+				}
+
+				dataManager.saveData();
+				SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+			}
+		});
 	}
 
 	private boolean containsItem(PurchaseProgressItem newItem)

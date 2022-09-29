@@ -39,10 +39,13 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.QuantityFormatter;
 import net.runelite.http.api.item.ItemPrice;
 
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -53,6 +56,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -74,6 +78,8 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     private static final ImageIcon ADD_HOVER_ICON;
     private static final ImageIcon CANCEL_ICON;
     private static final ImageIcon CANCEL_HOVER_ICON;
+    private static final ImageIcon SORT_ICON;
+    private static final ImageIcon SORT_HOVER_ICON;
     private static final int MAX_SEARCH_ITEMS = 100;
 
     private final PurchaseProgressPlugin plugin;
@@ -89,7 +95,9 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     private final JLabel cancelItem = new JLabel(CANCEL_ICON);
     private final JPanel centerPanel = new JPanel(centerCard);
     private final JPanel progressPanel = new JPanel();
+    private final JPanel valuePanel = new JPanel(new BorderLayout());
     private final JLabel value = new JLabel();
+    private final JLabel sortButton = new JLabel();
     private final JPanel searchPanel = new JPanel(new BorderLayout());
     private final JPanel searchCenterPanel = new JPanel(searchCard);
     private final JPanel searchResultsPanel = new JPanel();
@@ -108,6 +116,10 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         final BufferedImage cancelImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/cancel_icon.png");
         CANCEL_ICON = new ImageIcon(cancelImage);
         CANCEL_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(cancelImage, 0.53f));
+
+        final BufferedImage sortImage = ImageUtil.loadImageResource(PurchaseProgressPlugin.class, "/sort_icon.png");
+        SORT_ICON = new ImageIcon(sortImage);
+        SORT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(sortImage, 0.53f));
     }
 
     @Inject
@@ -198,6 +210,53 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
         value.setForeground(new Color(255, 202, 36));
         value.setBorder(new EmptyBorder(0, 0, 5, 0));
+
+        /* Sort Button */
+        JPopupMenu sortPopup = new JPopupMenu();
+
+        JMenuItem sortAscending = new JMenuItem(new AbstractAction("Sort (Low -> High)")
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                plugin.sort(true);
+            }
+        });
+        sortPopup.add(sortAscending);
+
+        JMenuItem sortDescending = new JMenuItem(new AbstractAction("Sort (High -> Low)")
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                plugin.sort(false);
+            }
+        });
+        sortPopup.add(sortDescending);
+
+        sortButton.setIcon(SORT_ICON);
+        sortButton.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseReleased(MouseEvent e)
+            {
+                sortPopup.show(e.getComponent(), e.getX(), e.getY());
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                sortButton.setIcon(SORT_HOVER_ICON);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                sortButton.setIcon(SORT_ICON);
+            }
+        });
+
+        valuePanel.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - 5, 20));
 
         /* Search Results Panel */
         searchResultsPanel.setLayout(new GridBagLayout());
@@ -344,7 +403,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         progressPanel.removeAll();
 
         updateValue();
-        progressPanel.add(value);
+        progressPanel.add(valuePanel);
 
         constraints.gridy++;
 
@@ -373,6 +432,8 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
     private void updateValue()
     {
+        valuePanel.removeAll();
+
         long progressValue = plugin.getValue();
         if (progressValue == 0)
         {
@@ -382,6 +443,9 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         {
             value.setText("Value: " + QuantityFormatter.formatNumber(plugin.getValue()) + " gp");
         }
+
+        valuePanel.add(value, BorderLayout.WEST);
+        valuePanel.add(sortButton, BorderLayout.EAST);
     }
 
     public void containsItemWarning()
