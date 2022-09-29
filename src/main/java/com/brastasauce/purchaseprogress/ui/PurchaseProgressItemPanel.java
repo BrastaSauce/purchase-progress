@@ -50,6 +50,10 @@ public class PurchaseProgressItemPanel extends JPanel
     private static final String DELETE_MESSAGE = "Are you sure you want to delete this progress item?";
     private static final ImageIcon DELETE_ICON;
     private static final ImageIcon DELETE_HOVER_ICON;
+    private static final ImageIcon SHIFT_UP_ICON;
+    private static final ImageIcon SHIFT_UP_HOVER_ICON;
+    private static final ImageIcon SHIFT_DOWN_ICON;
+    private static final ImageIcon SHIFT_DOWN_HOVER_ICON;
     private static final Dimension IMAGE_SIZE = new Dimension(32, 32);
 
     private float percent;
@@ -59,6 +63,14 @@ public class PurchaseProgressItemPanel extends JPanel
         final BufferedImage deleteImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/delete_icon.png");
         DELETE_ICON = new ImageIcon(deleteImage);
         DELETE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(deleteImage, 0.53f));
+
+        final BufferedImage shiftUpImage = ImageUtil.loadImageResource(PurchaseProgressPlugin.class, "/shift_up_icon.png");
+        SHIFT_UP_ICON = new ImageIcon(shiftUpImage);
+        SHIFT_UP_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(shiftUpImage, 0.53f));
+
+        final BufferedImage shiftDownImage = ImageUtil.loadImageResource(PurchaseProgressPlugin.class, "/shift_down_icon.png");
+        SHIFT_DOWN_ICON = new ImageIcon(shiftDownImage);
+        SHIFT_DOWN_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(shiftDownImage, 0.53f));
     }
 
     PurchaseProgressItemPanel(PurchaseProgressPlugin plugin, PurchaseProgressItem item)
@@ -67,6 +79,9 @@ public class PurchaseProgressItemPanel extends JPanel
         layout.setHgap(5);
         setLayout(layout);
         setBorder(new EmptyBorder(5, 5, 5, 0));
+
+        int itemIndex = plugin.getItems().indexOf(item);
+        int itemsSize = plugin.getItems().size();
 
         // Image
         JLabel itemImage = new JLabel();
@@ -112,10 +127,12 @@ public class PurchaseProgressItemPanel extends JPanel
         progressLabel.setText(String.format("%.0f", percent) + "%");
         rightPanel.add(progressLabel);
 
-        // Remove Button
-        JPanel deletePanel = new JPanel(new BorderLayout());
-        deletePanel.setBackground(new Color(0, 0, 0, 0));
+        // Action Panel (Delete, Shift item)
+        JPanel actionPanel = new JPanel(new BorderLayout());
+        actionPanel.setBackground(new Color(0, 0, 0, 0));
+        actionPanel.setOpaque(false);
 
+        // Delete Item
         JLabel deleteItem = new JLabel(DELETE_ICON);
         deleteItem.setBorder(new EmptyBorder(0, 15, 0, 0));
         deleteItem.addMouseListener(new MouseAdapter()
@@ -141,11 +158,90 @@ public class PurchaseProgressItemPanel extends JPanel
                 deleteItem.setIcon(DELETE_ICON);
             }
         });
-        deletePanel.add(deleteItem, BorderLayout.NORTH);
-        deletePanel.setOpaque(false);
+        actionPanel.add(deleteItem, BorderLayout.NORTH);
+
+        // Shift Item Panel
+        JPanel shiftItemPanel = new JPanel(new BorderLayout());
+        shiftItemPanel.setOpaque(false);
+
+        // Shift item up
+        JLabel shiftUp = new JLabel(SHIFT_UP_ICON);
+        shiftUp.setBorder(new EmptyBorder(0, 0, 0, 5));
+
+        if (itemIndex == 0)
+        {
+            shiftUp.setIcon(SHIFT_UP_HOVER_ICON);
+        }
+
+        shiftUp.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseReleased(MouseEvent e)
+            {
+                if (itemIndex != 0)
+                {
+                    plugin.shiftItem(itemIndex, true);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                shiftUp.setIcon(SHIFT_UP_HOVER_ICON);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                if (itemIndex != 0)
+                {
+                    shiftUp.setIcon(SHIFT_UP_ICON);
+                }
+            }
+        });
+        shiftItemPanel.add(shiftUp, BorderLayout.WEST);
+
+        // Shift item down
+        JLabel shiftDown = new JLabel(SHIFT_DOWN_ICON);
+        shiftDown.setBorder(new EmptyBorder(0, 0, 0, 5));
+
+        if (itemIndex == itemsSize - 1)
+        {
+            shiftDown.setIcon(SHIFT_DOWN_HOVER_ICON);
+        }
+
+        shiftDown.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseReleased(MouseEvent e)
+            {
+                if (itemIndex != itemsSize - 1)
+                {
+                    plugin.shiftItem(itemIndex, false);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                shiftDown.setIcon(SHIFT_DOWN_HOVER_ICON);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                if (itemIndex != itemsSize - 1)
+                {
+                    shiftDown.setIcon(SHIFT_DOWN_ICON);
+                }
+            }
+        });
+        shiftItemPanel.add(shiftDown, BorderLayout.EAST);
+
+        actionPanel.add(shiftItemPanel, BorderLayout.SOUTH);
 
         add(rightPanel, BorderLayout.CENTER);
-        add(deletePanel, BorderLayout.EAST);
+        add(actionPanel, BorderLayout.EAST);
     }
 
     private boolean deleteConfirm()

@@ -172,6 +172,28 @@ public class PurchaseProgressPlugin extends Plugin
 		});
 	}
 
+	public void shiftItem(int itemIndex, boolean shiftUp)
+	{
+		clientThread.invokeLater(() -> {
+			PurchaseProgressItem shiftedItem = items.get(itemIndex);
+
+			// Out of bounds is checked before call in item panel
+			if (shiftUp)
+			{
+				items.set(itemIndex, items.get(itemIndex - 1));
+				items.set(itemIndex - 1, shiftedItem);
+			}
+			else
+			{
+				items.set(itemIndex, items.get(itemIndex + 1));
+				items.set(itemIndex + 1, shiftedItem);
+			}
+
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
 	private boolean containsItem(PurchaseProgressItem newItem)
 	{
 		return items.contains(newItem);
