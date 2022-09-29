@@ -94,10 +94,11 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     private final JLabel addItem = new JLabel(ADD_ICON);
     private final JLabel cancelItem = new JLabel(CANCEL_ICON);
     private final JPanel centerPanel = new JPanel(centerCard);
-    private final JPanel progressPanel = new JPanel();
+    private final JPanel progressPanel = new JPanel(new BorderLayout());
     private final JPanel valuePanel = new JPanel(new BorderLayout());
     private final JLabel value = new JLabel();
     private final JLabel sortButton = new JLabel();
+    private final JPanel progressItemsPanel = new JPanel();
     private final JPanel searchPanel = new JPanel(new BorderLayout());
     private final JPanel searchCenterPanel = new JPanel(searchCard);
     private final JPanel searchResultsPanel = new JPanel();
@@ -196,18 +197,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         titlePanel.add(title, BorderLayout.WEST);
         titlePanel.add(actions, BorderLayout.EAST);
 
-        /* Progress Items Panel */
-        progressPanel.setLayout(new GridBagLayout());
-
-        JPanel pWrapper = new JPanel(new BorderLayout());
-        pWrapper.add(progressPanel, BorderLayout.NORTH);
-
-        JScrollPane progressWrapper = new JScrollPane(pWrapper);
-        progressWrapper.setBackground(ColorScheme.DARK_GRAY_COLOR);
-        progressWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
-        progressWrapper.getVerticalScrollBar().setPreferredSize(new Dimension(12, 0));
-        progressWrapper.getVerticalScrollBar().setBorder(new EmptyBorder(5, 5, 0, 0));
-
+        /* Value */
         value.setForeground(new Color(255, 202, 36));
         value.setBorder(new EmptyBorder(0, 0, 5, 0));
 
@@ -235,6 +225,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         sortPopup.add(sortDescending);
 
         sortButton.setIcon(SORT_ICON);
+        sortButton.setBorder(new EmptyBorder(0, 0, 0, 2));
         sortButton.addMouseListener(new MouseAdapter()
         {
             @Override
@@ -255,6 +246,26 @@ public class PurchaseProgressPluginPanel extends PluginPanel
                 sortButton.setIcon(SORT_ICON);
             }
         });
+
+        /* Value Panel (contains value text and sort button) */
+        valuePanel.add(value, BorderLayout.WEST);
+        valuePanel.add(sortButton, BorderLayout.EAST);
+
+        /* Progress Items Panel */
+        progressItemsPanel.setLayout(new GridBagLayout());
+
+        JPanel pWrapper = new JPanel(new BorderLayout());
+        pWrapper.add(progressItemsPanel, BorderLayout.NORTH);
+
+        JScrollPane progressWrapper = new JScrollPane(pWrapper);
+        progressWrapper.setBackground(ColorScheme.DARK_GRAY_COLOR);
+        progressWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
+        progressWrapper.getVerticalScrollBar().setPreferredSize(new Dimension(12, 0));
+        progressWrapper.getVerticalScrollBar().setBorder(new EmptyBorder(5, 5, 0, 0));
+
+        /* Progress Panel (contains value panel and progress items panel) */
+        progressPanel.add(valuePanel, BorderLayout.NORTH);
+        progressPanel.add(progressWrapper, BorderLayout.CENTER);
 
         /* Search Results Panel */
         searchResultsPanel.setLayout(new GridBagLayout());
@@ -317,7 +328,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         searchPanel.add(searchCenterPanel, BorderLayout.CENTER);
 
         /* Center Panel (contains progress items/search items panel) */
-        centerPanel.add(progressWrapper, PROGRESS_PANEL);
+        centerPanel.add(progressPanel, PROGRESS_PANEL);
         centerPanel.add(searchPanel, SEARCH_PANEL);
         centerCard.show(centerPanel, PROGRESS_PANEL);
 
@@ -398,10 +409,9 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
     public void updateProgressPanels()
     {
-        progressPanel.removeAll();
+        progressItemsPanel.removeAll();
 
         updateValue();
-        progressPanel.add(valuePanel);
 
         constraints.gridy++;
 
@@ -415,11 +425,11 @@ public class PurchaseProgressPluginPanel extends PluginPanel
                 JPanel marginWrapper = new JPanel(new BorderLayout());
                 marginWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
                 marginWrapper.add(panel, BorderLayout.NORTH);
-                progressPanel.add(marginWrapper, constraints);
+                progressItemsPanel.add(marginWrapper, constraints);
             }
             else
             {
-                progressPanel.add(panel, constraints);
+                progressItemsPanel.add(panel, constraints);
             }
 
             constraints.gridy++;
@@ -430,8 +440,6 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
     private void updateValue()
     {
-        valuePanel.removeAll();
-
         long progressValue = plugin.getValue();
         if (progressValue == 0)
         {
@@ -441,9 +449,6 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         {
             value.setText("Value: " + QuantityFormatter.formatNumber(plugin.getValue()) + " gp");
         }
-
-        valuePanel.add(value, BorderLayout.WEST);
-        valuePanel.add(sortButton, BorderLayout.EAST);
     }
 
     public void containsItemWarning()
