@@ -256,8 +256,6 @@ public class PurchaseProgressPluginPanel extends PluginPanel
             }
         });
 
-        valuePanel.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - 5, 20));
-
         /* Search Results Panel */
         searchResultsPanel.setLayout(new GridBagLayout());
 
