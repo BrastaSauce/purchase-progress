@@ -204,7 +204,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         /* Sort Button */
         JPopupMenu sortPopup = new JPopupMenu();
 
-        JMenuItem sortAscending = new JMenuItem(new AbstractAction("Sort (Low -> High)")
+        JMenuItem sortAscending = new JMenuItem(new AbstractAction("Sort by Price (Low -> High)")
         {
             @Override
             public void actionPerformed(ActionEvent e)
@@ -214,7 +214,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         });
         sortPopup.add(sortAscending);
 
-        JMenuItem sortDescending = new JMenuItem(new AbstractAction("Sort (High -> Low)")
+        JMenuItem sortDescending = new JMenuItem(new AbstractAction("Sort by Price (High -> Low)")
         {
             @Override
             public void actionPerformed(ActionEvent e)
