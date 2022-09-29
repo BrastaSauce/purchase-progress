@@ -30,7 +30,7 @@ import lombok.Setter;
 import net.runelite.client.util.AsyncBufferedImage;
 
 @AllArgsConstructor
-public class PurchaseProgressItem
+public class PurchaseProgressItem implements Comparable<PurchaseProgressItem>
 {
     @Getter
     private AsyncBufferedImage image;
@@ -55,5 +55,11 @@ public class PurchaseProgressItem
 
         final PurchaseProgressItem item = (PurchaseProgressItem) obj;
         return item.getItemId() == this.itemId;
+    }
+
+    @Override
+    public int compareTo(PurchaseProgressItem other)
+    {
+        return Integer.compare(gePrice, other.getGePrice());
     }
 }
