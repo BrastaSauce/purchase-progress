@@ -72,19 +72,21 @@ public class BankCalculation
         final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
         final ItemContainer bank = client.getItemContainer(InventoryID.BANK);
 
-        // Add inventory GP
+        // Add inventory GP/tokens
         if (inventory != null)
         {
             value += inventory.count(ItemID.COINS_995);
+            value += inventory.count(ItemID.PLATINUM_TOKEN) * 1000L;
         }
 
-        // Add bank GP
         if (bank == null)
         {
             return value;
         }
 
+        // Add bank GP/tokens
         value += bank.count(ItemID.COINS_995);
+        value += bank.count(ItemID.PLATINUM_TOKEN) * 1000L;
 
         // Add loot tab value if selected
         if (!config.includeBankTab())
@@ -142,8 +144,7 @@ public class BankCalculation
                 case ItemID.COINS_995:
                     break; // Inventory and Bank coins already calculated
                 case ItemID.PLATINUM_TOKEN:
-                    value += qty * 1000L;
-                    break;
+                    break; // Inventory and Bank tokens already calculated
                 default:
                     value += (long) itemManager.getItemPrice(id) * qty;
                     break;
