@@ -390,10 +390,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
                 if (index++ > 0)
                 {
-                    JPanel marginWrapper = new JPanel(new BorderLayout());
-                    marginWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
-                    marginWrapper.add(panel, BorderLayout.NORTH);
-                    searchResultsPanel.add(marginWrapper, constraints);
+                    searchResultsPanel.add(createMarginWrapper(panel), constraints);
                 }
                 else
                 {
@@ -416,23 +413,28 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         constraints.gridy++;
 
         int index = 0;
+        long totalCost = 0;
         for (PurchaseProgressItem item : plugin.getItems())
         {
             PurchaseProgressItemPanel panel = new PurchaseProgressItemPanel(plugin, item);
 
             if (index++ > 0)
             {
-                JPanel marginWrapper = new JPanel(new BorderLayout());
-                marginWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
-                marginWrapper.add(panel, BorderLayout.NORTH);
-                progressItemsPanel.add(marginWrapper, constraints);
+                progressItemsPanel.add(createMarginWrapper(panel), constraints);
             }
             else
             {
                 progressItemsPanel.add(panel, constraints);
             }
 
+            totalCost += item.getGePrice();
             constraints.gridy++;
+        }
+
+        if (totalCost != 0)
+        {
+            PurchaseProgressTotalPanel totalCostPanel = new PurchaseProgressTotalPanel(plugin.getValue(), totalCost);
+            progressItemsPanel.add(createMarginWrapper(totalCostPanel), constraints);
         }
 
         validate();
@@ -472,5 +474,13 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         addItem.setVisible(false);
         cancelItem.setVisible(true);
         centerCard.show(centerPanel, SEARCH_PANEL);
+    }
+
+    private JPanel createMarginWrapper(JPanel panel)
+    {
+        JPanel marginWrapper = new JPanel(new BorderLayout());
+        marginWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
+        marginWrapper.add(panel, BorderLayout.NORTH);
+        return marginWrapper;
     }
 }

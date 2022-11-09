@@ -241,12 +241,9 @@ public class PurchaseProgressPlugin extends Plugin
 	{
 		if (event.getScriptId() == ScriptID.BANKMAIN_BUILD)
 		{
-			clientThread.invokeLater(() ->
-			{
-				value = bankCalculation.calculateValue();
-				dataManager.saveData();
-				SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
-			});
+			value = bankCalculation.calculateValue();
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
 		}
 	}
 }

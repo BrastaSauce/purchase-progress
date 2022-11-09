@@ -256,8 +256,7 @@ public class PurchaseProgressItemPanel extends JPanel
     protected void paintComponent(Graphics g)
     {
         g.setColor(new Color(12, 85, 35));
-        float greenPercent = this.getWidth() * percent / 100;
-        int greenWidth = (int) greenPercent;
+        int greenWidth = (int) (this.getWidth() * percent / 100);
         g.fillRect(0, 0, greenWidth, this.getHeight());
 
         if (greenWidth != this.getWidth())
