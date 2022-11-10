@@ -44,15 +44,18 @@ public class PurchaseProgressDataManager
 {
     private static final String CONFIG_KEY_VALUE = "value";
     private static final String CONFIG_KEY_ITEMIDS = "itemIds";
+    private static final String CONFIG_KEY_GROUPS = "groups";
 
     private final PurchaseProgressPlugin plugin;
     private final ConfigManager configManager;
     private final ItemManager itemManager;
     private final Gson gson;
 
+    private List<Integer> itemIds = new ArrayList<>();
     private final Type itemsType = new TypeToken<ArrayList<Integer>>(){}.getType();
 
-    private List<Integer> itemIds = new ArrayList<>();
+    private List<PurchaseProgressGroupData> groups = new ArrayList<>();
+    private final Type groupsType = new TypeToken<ArrayList<PurchaseProgressGroupData>>(){}.getType();
 
     @Inject
     public PurchaseProgressDataManager(PurchaseProgressPlugin plugin, ConfigManager configManager, ItemManager itemManager, Gson gson)
@@ -65,9 +68,11 @@ public class PurchaseProgressDataManager
 
     public void loadData()
     {
+        // Value
         String value = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_VALUE);
         plugin.setValue(Long.parseLong(value));
 
+        // Individual Items
         itemIds.clear();
 
         String itemsJson = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_ITEMIDS);
@@ -79,22 +84,47 @@ public class PurchaseProgressDataManager
         {
             try
             {
-                itemIds = (gson.fromJson(itemsJson, itemsType));
-                convertIds();
+                itemIds = gson.fromJson(itemsJson, itemsType);
+                convertItems();
             }
             catch (Exception e)
             {
-                log.error("Exception occurred while loading purchase progress data", e);
+                log.error("Exception occurred while loading purchase progress items", e);
                 plugin.setItems(new ArrayList<>());
+            }
+        }
+
+        // Groups and their items
+        groups.clear();
+
+        String groupsJson = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_GROUPS);
+        if (groupsJson == null || groupsJson.equals("[]"))
+        {
+            plugin.setGroups(new ArrayList<>());
+        }
+        else
+        {
+            try
+            {
+                groups = gson.fromJson(groupsJson, groupsType);
+                convertGroups();
+            }
+            catch (Exception e)
+            {
+                log.error("Exception occurred while loading purchase progress groups");
+                plugin.setGroups(new ArrayList<>());
             }
         }
     }
 
     public void saveData()
     {
+        // Value
         configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_VALUE, String.valueOf(plugin.getValue()));
 
+        // Individual Items
         itemIds.clear();
+
         for (PurchaseProgressItem item : plugin.getItems())
         {
             itemIds.add(item.getItemId());
@@ -102,22 +132,59 @@ public class PurchaseProgressDataManager
 
         final String itemsJson = gson.toJson(itemIds);
         configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_ITEMIDS, itemsJson);
+
+        // Groups and their items
+        groups.clear();
+
+        for (PurchaseProgressGroup group : plugin.getGroups())
+        {
+            List<Integer> groupItems = new ArrayList<>();
+            for (PurchaseProgressItem item : group.getItems())
+            {
+                groupItems.add(item.getItemId());
+            }
+
+            groups.add(new PurchaseProgressGroupData(group.getName(), groupItems));
+        }
+
+        final String groupsJson = gson.toJson(groups);
+        configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_GROUPS, groupsJson);
     }
 
-    private void convertIds()
+    private void convertItems()
     {
         List<PurchaseProgressItem> progressItems = new ArrayList<>();
 
         for (Integer itemId : itemIds)
         {
-            AsyncBufferedImage itemImage = itemManager.getImage(itemId);
-            String itemName = itemManager.getItemComposition(itemId).getName();
-
-            // Item prices get updated after load
-            PurchaseProgressItem progressItem = new PurchaseProgressItem(itemImage, itemName, itemId, 0);
-            progressItems.add(progressItem);
+            progressItems.add(convertIdToItem(itemId));
         }
 
         plugin.setItems(progressItems);
+    }
+
+    private void convertGroups()
+    {
+        List<PurchaseProgressGroup> progressGroups = new ArrayList<>();
+
+        for (PurchaseProgressGroupData group : groups)
+        {
+            List<PurchaseProgressItem> groupItems = new ArrayList<>();
+            for (Integer itemId : group.getItems())
+            {
+                groupItems.add(convertIdToItem(itemId));
+            }
+
+            progressGroups.add(new PurchaseProgressGroup(group.getName(), groupItems));
+        }
+
+        plugin.setGroups(progressGroups);
+    }
+
+    private PurchaseProgressItem convertIdToItem(int itemId)
+    {
+        AsyncBufferedImage itemImage = itemManager.getImage(itemId);
+        String itemName = itemManager.getItemComposition(itemId).getName();
+        return new PurchaseProgressItem(itemImage, itemName, itemId, 0); // Item prices updated after load
     }
 }

@@ -25,6 +25,7 @@
 package com.brastasauce.purchaseprogress;
 
 import com.brastasauce.purchaseprogress.data.PurchaseProgressDataManager;
+import com.brastasauce.purchaseprogress.data.PurchaseProgressGroup;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
 import com.brastasauce.purchaseprogress.ui.PurchaseProgressPluginPanel;
 import com.google.gson.Gson;
@@ -70,6 +71,10 @@ public class PurchaseProgressPlugin extends Plugin
 	@Getter
 	@Setter
 	private List<PurchaseProgressItem> items = new ArrayList<>();
+
+	@Getter
+	@Setter
+	private List<PurchaseProgressGroup> groups = new ArrayList<>();
 
 	@Getter
 	@Setter
@@ -144,6 +149,16 @@ public class PurchaseProgressPlugin extends Plugin
 	)
 	public void updateItemPrices()
 	{
+		// Group item prices
+		for (PurchaseProgressGroup group : groups)
+		{
+			for (PurchaseProgressItem item : group.getItems())
+			{
+				item.setGePrice(itemManager.getItemPrice(item.getItemId()));
+			}
+		}
+
+		// Individual prices
 		for (PurchaseProgressItem item : items)
 		{
 			item.setGePrice(itemManager.getItemPrice(item.getItemId()));
