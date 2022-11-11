@@ -24,7 +24,6 @@
  */
 package com.brastasauce.purchaseprogress.ui;
 
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.QuantityFormatter;
 
 import javax.swing.JLabel;
@@ -37,11 +36,14 @@ import java.awt.Graphics;
 public class PurchaseProgressTotalPanel extends JPanel
 {
     private float percent;
+    private final Color background;
 
-    PurchaseProgressTotalPanel(long value, long totalCost)
+    PurchaseProgressTotalPanel(long value, long totalCost, Color background)
     {
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(5, 5, 5, 0));
+
+        this.background = background;
 
         JPanel totalPanel = new JPanel(new BorderLayout());
         totalPanel.setBackground(new Color(0, 0, 0, 0));
@@ -74,7 +76,7 @@ public class PurchaseProgressTotalPanel extends JPanel
 
         if (greenWidth != this.getWidth())
         {
-            g.setColor(ColorScheme.DARKER_GRAY_COLOR);
+            g.setColor(background);
             g.fillRect(greenWidth, 0, this.getWidth() - greenWidth, this.getHeight());
         }
     }

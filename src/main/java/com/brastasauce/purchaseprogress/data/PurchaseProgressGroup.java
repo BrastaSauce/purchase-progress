@@ -38,4 +38,16 @@ public class PurchaseProgressGroup {
 
     @Getter
     private List<PurchaseProgressItem> items;
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof PurchaseProgressGroup))
+        {
+            return false;
+        }
+
+        final PurchaseProgressGroup group = (PurchaseProgressGroup) obj;
+        return group.getName().equals(this.name);
+    }
 }

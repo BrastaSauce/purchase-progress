@@ -24,6 +24,7 @@
  */
 package com.brastasauce.purchaseprogress.ui;
 
+import com.brastasauce.purchaseprogress.data.PurchaseProgressGroup;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
 import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
 import com.google.inject.Inject;
@@ -76,6 +77,8 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     private static final String CONTAINS_ITEM_MESSAGE = "This item is already being tracked.";
     private static final ImageIcon ADD_ICON;
     private static final ImageIcon ADD_HOVER_ICON;
+    private static final ImageIcon ADD_GROUP_ICON;
+    private static final ImageIcon ADD_GROUP_HOVER_ICON;
     private static final ImageIcon CANCEL_ICON;
     private static final ImageIcon CANCEL_HOVER_ICON;
     private static final ImageIcon SORT_ICON;
@@ -91,7 +94,9 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     private final CardLayout searchCard = new CardLayout();
     private final JPanel titlePanel = new JPanel(new BorderLayout());
     private final JLabel title = new JLabel();
+    private final JPanel progressActions = new JPanel(new BorderLayout());
     private final JLabel addItem = new JLabel(ADD_ICON);
+    private final JLabel addGroup = new JLabel(ADD_GROUP_ICON);
     private final JLabel cancelItem = new JLabel(CANCEL_ICON);
     private final JPanel centerPanel = new JPanel(centerCard);
     private final JPanel progressPanel = new JPanel(new BorderLayout());
@@ -113,6 +118,10 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         final BufferedImage addImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/add_icon.png");
         ADD_ICON = new ImageIcon(addImage);
         ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addImage, 0.53f));
+
+        final BufferedImage addGroupImage = ImageUtil.loadImageResource(PurchaseProgressGroupPanel.class, "/add_group_icon.png");
+        ADD_GROUP_ICON = new ImageIcon(addGroupImage);
+        ADD_GROUP_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addGroupImage, 0.53f));
 
         final BufferedImage cancelImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/cancel_icon.png");
         CANCEL_ICON = new ImageIcon(cancelImage);
@@ -145,6 +154,31 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
 
+        /* Add Group Button */
+        addGroup.setToolTipText("Add a group");
+        addGroup.setBorder(new EmptyBorder(0, 0, 0, 10));
+        addGroup.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                plugin.addGroup();
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                addGroup.setIcon(ADD_GROUP_HOVER_ICON);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                addGroup.setIcon(ADD_GROUP_ICON);
+            }
+        });
+        progressActions.add(addGroup, BorderLayout.WEST);
+
         /* Add Item Button */
         addItem.setToolTipText("Add an item from the Grand Exchange");
         addItem.addMouseListener(new MouseAdapter()
@@ -167,7 +201,9 @@ public class PurchaseProgressPluginPanel extends PluginPanel
                 addItem.setIcon(ADD_ICON);
             }
         });
-        actions.add(addItem);
+        progressActions.add(addItem, BorderLayout.EAST);
+
+        actions.add(progressActions);
 
         /* Cancel Button */
         cancelItem.setToolTipText("Cancel");
@@ -414,6 +450,26 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
         int index = 0;
         long totalCost = 0;
+
+        // Groups
+        for (PurchaseProgressGroup group : plugin.getGroups())
+        {
+            PurchaseProgressGroupPanel panel = new PurchaseProgressGroupPanel(plugin, this, group);
+
+            if (index++ > 0)
+            {
+                progressItemsPanel.add(createMarginWrapper(panel), constraints);
+            }
+            else
+            {
+                progressItemsPanel.add(panel, constraints);
+            }
+
+            totalCost += panel.getTotalCost();
+            constraints.gridy++;
+        }
+
+        // Individual items
         for (PurchaseProgressItem item : plugin.getItems())
         {
             PurchaseProgressItemPanel panel = new PurchaseProgressItemPanel(plugin, item);
@@ -433,7 +489,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
         if (totalCost != 0)
         {
-            PurchaseProgressTotalPanel totalCostPanel = new PurchaseProgressTotalPanel(plugin.getValue(), totalCost);
+            PurchaseProgressTotalPanel totalCostPanel = new PurchaseProgressTotalPanel(plugin.getValue(), totalCost, ColorScheme.DARKER_GRAY_COLOR);
             progressItemsPanel.add(createMarginWrapper(totalCostPanel), constraints);
         }
 
@@ -465,13 +521,13 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     public void switchToProgress()
     {
         cancelItem.setVisible(false);
-        addItem.setVisible(true);
+        progressActions.setVisible(true);
         centerCard.show(centerPanel, PROGRESS_PANEL);
     }
 
     private void switchToSearch()
     {
-        addItem.setVisible(false);
+        progressActions.setVisible(false);
         cancelItem.setVisible(true);
         centerCard.show(centerPanel, SEARCH_PANEL);
     }

@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.inject.Provides;
 
 import javax.inject.Inject;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import lombok.Getter;
@@ -67,6 +68,7 @@ public class PurchaseProgressPlugin extends Plugin
 	public static final String CONFIG_GROUP = "purchaseprogress";
 	private static final String PLUGIN_NAME = "Purchase Progress";
 	private static final String ICON_IMAGE = "/panel_icon.png";
+	private static final int MAX_GROUP_NAME_LENGTH = 50;
 
 	@Getter
 	@Setter
@@ -143,6 +145,97 @@ public class PurchaseProgressPlugin extends Plugin
 		});
 	}
 
+	public void addGroup()
+	{
+		final String msg = "Enter the name of this group (max " + MAX_GROUP_NAME_LENGTH + " chars).";
+		String name = JOptionPane.showInputDialog(panel, msg, "Add New Group", JOptionPane.PLAIN_MESSAGE);
+
+		if (name == null || name.isEmpty())
+		{
+			return;
+		}
+
+		if (name.length() > MAX_GROUP_NAME_LENGTH)
+		{
+			name = name.substring(0, MAX_GROUP_NAME_LENGTH);
+		}
+
+		String groupName = name;
+		clientThread.invokeLater(() -> {
+			PurchaseProgressGroup group = new PurchaseProgressGroup(groupName, new ArrayList<>());
+
+			if (!groups.contains(group))
+			{
+				groups.add(group);
+				dataManager.saveData();
+				SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+			}
+		});
+	}
+
+	public void editGroup(PurchaseProgressGroup group)
+	{
+		final String msg = "Enter the name of this group (max " + MAX_GROUP_NAME_LENGTH + " chars).";
+		String name = JOptionPane.showInputDialog(panel, msg, "Edit Group", JOptionPane.PLAIN_MESSAGE);
+
+		if (name == null || name.isEmpty())
+		{
+			return;
+		}
+
+		if (name.length() > MAX_GROUP_NAME_LENGTH)
+		{
+			name = name.substring(0, MAX_GROUP_NAME_LENGTH);
+		}
+
+		String groupName = name;
+		clientThread.invokeLater(() -> {
+			PurchaseProgressGroup nameCheck = groups.stream().filter(o -> o.getName().equals(groupName)).findFirst().orElse(null);
+
+			if (nameCheck == null)
+			{
+				group.setName(groupName);
+				dataManager.saveData();
+				SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+			}
+		});
+	}
+
+	public void removeGroup(PurchaseProgressGroup group)
+	{
+		clientThread.invokeLater(() -> {
+			// Move items out of group and delete
+			items.addAll(group.getItems());
+			groups.remove(group);
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
+	public void addItemsToGroup(PurchaseProgressGroup group, List<String> itemNames)
+	{
+		clientThread.invokeLater(() -> {
+			for (String itemName : itemNames)
+			{
+				PurchaseProgressItem item = items.stream().filter(o -> o.getName().equals(itemName)).findFirst().orElse(null);
+				group.getItems().add(item);
+				items.remove(item);
+			}
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
+	public void removeItemFromGroup(PurchaseProgressGroup group, PurchaseProgressItem item)
+	{
+		clientThread.invokeLater(() -> {
+			group.getItems().remove(item);
+			items.add(item);
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
 	@Schedule(
 			period = 5,
 			unit = ChronoUnit.MINUTES
@@ -209,8 +302,38 @@ public class PurchaseProgressPlugin extends Plugin
 		});
 	}
 
+	public void shiftItemInGroup(PurchaseProgressGroup group, int itemIndex, boolean shiftUp)
+	{
+		clientThread.invokeLater(() -> {
+			List<PurchaseProgressItem> groupItems = group.getItems();
+			PurchaseProgressItem shiftedItem = group.getItems().get(itemIndex);
+
+			// Out of bounds is checked before call in group item panel
+			if (shiftUp)
+			{
+				groupItems.set(itemIndex, groupItems.get(itemIndex - 1));
+				groupItems.set(itemIndex -1, shiftedItem);
+			}
+			else
+			{
+				groupItems.set(itemIndex, groupItems.get(itemIndex + 1));
+				groupItems.set(itemIndex +1, shiftedItem);
+			}
+
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
 	private boolean containsItem(PurchaseProgressItem newItem)
 	{
+		for (PurchaseProgressGroup group : groups)
+		{
+			if (group.getItems().contains(newItem))
+			{
+				return true;
+			}
+		}
 		return items.contains(newItem);
 	}
 
