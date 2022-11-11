@@ -8,9 +8,16 @@ A plugin to track how close you are to affording an item. Search for items to ad
 * **Bank Tab:** The bank tab to include. Input 0 to use entire bank value.
 
 ## Tracking Items
-![](https://i.imgur.com/QRLLUKn.png)
+![](https://i.imgur.com/COLvOkS.png)
 
 Items will be tracked using the bank value you configured alongside Grand Exchange prices. Your bank value will be updated anytime you visit the bank. The item prices will be updated every 5 minutes.
+
+## Grouping Items
+![](https://i.imgur.com/dtMiFTn.png)
+
+![](https://i.imgur.com/PJG7mwN.png)
+
+Groups can be created by clicking the ![](/src/main/resources/add_group_icon.png) icon at the top. Groups will track their own progress but will also contribute to the total progress for all items. Groups can be deleted by right clicking the group and selecting 'Delete Group'. This will not delete the items within them. Items can be removed from the group individually by clicking the ![](/src/main/resources/delete_icon.png) icon next to them.
 
 ### Sorting
 
