@@ -48,9 +48,7 @@ public class PurchaseProgressResultPanel extends JPanel
 
     PurchaseProgressResultPanel(PurchaseProgressPlugin plugin, PurchaseProgressItem item)
     {
-        BorderLayout layout = new BorderLayout();
-        layout.setHgap(5);
-        setLayout(layout);
+        setLayout(new BorderLayout(5, 0));
         setToolTipText(item.getName());
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
 

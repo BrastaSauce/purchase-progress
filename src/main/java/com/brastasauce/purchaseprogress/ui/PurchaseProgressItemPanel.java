@@ -75,9 +75,7 @@ public class PurchaseProgressItemPanel extends JPanel
 
     PurchaseProgressItemPanel(PurchaseProgressPlugin plugin, PurchaseProgressItem item)
     {
-        BorderLayout layout = new BorderLayout();
-        layout.setHgap(5);
-        setLayout(layout);
+        setLayout(new BorderLayout(5, 0));
         setBorder(new EmptyBorder(5, 5, 5, 0));
 
         int itemIndex = plugin.getItems().indexOf(item);
