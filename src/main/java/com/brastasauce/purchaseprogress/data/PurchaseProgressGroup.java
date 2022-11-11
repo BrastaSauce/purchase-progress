@@ -37,7 +37,18 @@ public class PurchaseProgressGroup {
     private String name;
 
     @Getter
-    private List<PurchaseProgressItem> items;
+    @Setter
+    private boolean collapsed;
+
+    @Getter
+    private final List<PurchaseProgressItem> items;
+
+    public PurchaseProgressGroup(String name, List<PurchaseProgressItem> items)
+    {
+        this.name = name;
+        collapsed = false;
+        this.items = items;
+    }
 
     @Override
     public boolean equals(Object obj)

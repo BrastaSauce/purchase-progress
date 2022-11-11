@@ -236,6 +236,15 @@ public class PurchaseProgressPlugin extends Plugin
 		});
 	}
 
+	public void switchGroupCollapse(PurchaseProgressGroup group)
+	{
+		clientThread.invokeLater(() -> {
+			group.setCollapsed(!group.isCollapsed());
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
 	@Schedule(
 			period = 5,
 			unit = ChronoUnit.MINUTES

@@ -144,7 +144,7 @@ public class PurchaseProgressDataManager
                 groupItems.add(item.getItemId());
             }
 
-            groups.add(new PurchaseProgressGroupData(group.getName(), groupItems));
+            groups.add(new PurchaseProgressGroupData(group.getName(), group.isCollapsed(), groupItems));
         }
 
         final String groupsJson = gson.toJson(groups);
@@ -175,7 +175,7 @@ public class PurchaseProgressDataManager
                 groupItems.add(convertIdToItem(itemId));
             }
 
-            progressGroups.add(new PurchaseProgressGroup(group.getName(), groupItems));
+            progressGroups.add(new PurchaseProgressGroup(group.getName(), group.isCollapsed(), groupItems));
         }
 
         plugin.setGroups(progressGroups);

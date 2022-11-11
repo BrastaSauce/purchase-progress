@@ -44,6 +44,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -59,6 +60,13 @@ public class PurchaseProgressGroupPanel extends JPanel
     private static final String DELETE_MESSAGE = "Are you sure you want to delete this progress group? This will not delete your items.";
     private static final ImageIcon ADD_ICON;
     private static final ImageIcon ADD_HOVER_ICON;
+    private static final ImageIcon COLLAPSED_ICON;
+    private static final ImageIcon COLLAPSED_HOVER_ICON;
+    private static final ImageIcon UNCOLLAPSED_ICON;
+    private static final ImageIcon UNCOLLAPSED_HOVER_ICON;
+
+    private float percent;
+    private final boolean collapsed;
 
     @Getter
     private long totalCost;
@@ -68,6 +76,14 @@ public class PurchaseProgressGroupPanel extends JPanel
         final BufferedImage addImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/add_icon_white.png");
         ADD_ICON = new ImageIcon(ImageUtil.alphaOffset(addImage, 0.53f));
         ADD_HOVER_ICON = new ImageIcon(addImage);
+
+        final BufferedImage collapsedImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/collapsed_icon.png");
+        COLLAPSED_ICON = new ImageIcon(collapsedImage);
+        COLLAPSED_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(collapsedImage, 0.53f));
+
+        final BufferedImage uncollapsedImage = ImageUtil.loadImageResource(PurchaseProgressPluginPanel.class, "/shift_down_icon.png");
+        UNCOLLAPSED_ICON = new ImageIcon(uncollapsedImage);
+        UNCOLLAPSED_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(uncollapsedImage, 0.53f));
     }
 
     PurchaseProgressGroupPanel(PurchaseProgressPlugin plugin, PurchaseProgressPluginPanel panel, PurchaseProgressGroup group)
@@ -75,6 +91,13 @@ public class PurchaseProgressGroupPanel extends JPanel
         setLayout(new BorderLayout(5, 0));
         setBorder(new EmptyBorder(5, 5, 5, 0));
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+        for (PurchaseProgressItem item : group.getItems())
+        {
+            totalCost += item.getGePrice();
+        }
+
+        this.collapsed = group.isCollapsed();
 
         // Top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -108,131 +131,212 @@ public class PurchaseProgressGroupPanel extends JPanel
             }
         });
 
+        // Collapse and Names
+        JPanel leftActions = new JPanel(new BorderLayout());
+        leftActions.setOpaque(false);
+
         // Group Name
         JLabel groupName = new JLabel();
         groupName.setForeground(Color.WHITE);
-        groupName.setPreferredSize(new Dimension(150, 0));
+        groupName.setBorder(new EmptyBorder(0, 5, 0, 0));
+        groupName.setPreferredSize(new Dimension(140, 0));
         groupName.setText(group.getName());
-        topPanel.add(groupName, BorderLayout.WEST);
 
-        // Actions Panel
-        JPanel actions = new JPanel(new BorderLayout());
-        actions.setBorder(new EmptyBorder(0, 0, 0, 5));
-        actions.setOpaque(false);
+        // Collapse
+        JLabel collapseButton = new JLabel();
+        collapseButton.setOpaque(false);
 
-        // Edit Button
-        JLabel edit = new JLabel("Edit");
-        edit.setVerticalAlignment(SwingConstants.CENTER);
-        edit.setBorder(new EmptyBorder(0, 0, 0, 0));
-        edit.setForeground(Color.LIGHT_GRAY);
-        edit.addMouseListener(new MouseAdapter()
+        if (collapsed)
         {
-            @Override
-            public void mouseReleased(MouseEvent e)
+            groupName.setPreferredSize(new Dimension(160, 0));
+
+            collapseButton.setIcon(COLLAPSED_ICON);
+            collapseButton.addMouseListener(new MouseAdapter()
             {
-                plugin.editGroup(group);
-            }
+                @Override
+                public void mouseReleased(MouseEvent e)
+                {
+                    plugin.switchGroupCollapse(group);
+                }
 
-            @Override
-            public void mouseEntered(MouseEvent e)
+                @Override
+                public void mouseEntered(MouseEvent e)
+                {
+                    collapseButton.setIcon(COLLAPSED_HOVER_ICON);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e)
+                {
+                    collapseButton.setIcon(COLLAPSED_ICON);
+                }
+            });
+
+            leftActions.add(groupName, BorderLayout.EAST);
+            leftActions.add(collapseButton, BorderLayout.WEST);
+
+            // Percent
+            JLabel percentLabel = new JLabel();
+            percentLabel.setBorder(new EmptyBorder(0, 0, 0, 5));
+            percent = ((float) plugin.getValue() / totalCost) * 100;
+            if (totalCost == 0)
             {
-                edit.setForeground(Color.WHITE);
+                percent = 0;
             }
-
-            @Override
-            public void mouseExited(MouseEvent e)
+            else if (percent >= 100)
             {
-                edit.setForeground(Color.LIGHT_GRAY);
+                percent = 100;
             }
-        });
-        actions.add(edit, BorderLayout.WEST);
+            percentLabel.setText(String.format("%.0f", percent) + "%");
 
-        // Empty panel to separate without causing extra hover
-        JPanel empty = new JPanel();
-        empty.setOpaque(false);
-        actions.add(empty, BorderLayout.CENTER);
+            topPanel.add(leftActions, BorderLayout.WEST);
+            topPanel.add(percentLabel, BorderLayout.EAST);
 
-        JLabel addItem = new JLabel(ADD_ICON);
-        addItem.setOpaque(false);
-        addItem.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                final String[] itemNames = plugin.getItems().stream().map(PurchaseProgressItem::getName).toArray(String[]::new);
-                Arrays.sort(itemNames, String.CASE_INSENSITIVE_ORDER);
-
-                PurchaseProgressSelectionPanel selection = new PurchaseProgressSelectionPanel(panel, itemNames);
-                selection.setOnOk(e1 -> {
-                    List<String> selectedItems = selection.getSelectedItems();
-                    if (!selectedItems.isEmpty())
-                    {
-                        plugin.addItemsToGroup(group, selectedItems);
-                    }
-                });
-                selection.show();
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e)
-            {
-                addItem.setIcon(ADD_HOVER_ICON);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e)
-            {
-                addItem.setIcon(ADD_ICON);
-            }
-        });
-        actions.add(addItem, BorderLayout.EAST);
-
-        topPanel.add(actions, BorderLayout.EAST);
-
-        // Group Items
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridwidth = 1;
-        constraints.weightx = 1;
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-
-        JPanel itemsPanel = new JPanel();
-        itemsPanel.setLayout(new GridBagLayout());
-        itemsPanel.setBorder(new EmptyBorder(5, 5, 0, 5));
-        itemsPanel.setOpaque(false);
-
-        int index = 0;
-        for (PurchaseProgressItem item : group.getItems())
-        {
-            PurchaseProgressGroupItemPanel itemPanel = new PurchaseProgressGroupItemPanel(plugin, group, item);
-
-            if (index++ > 0)
-            {
-                itemsPanel.add(createMarginWrapper(itemPanel), constraints);
-            }
-            else
-            {
-                itemsPanel.add(itemPanel, constraints);
-            }
-
-            constraints.gridy++;
+            add(topPanel, BorderLayout.CENTER);
         }
-
-        // Bottom Panel
-        for (PurchaseProgressItem item : group.getItems())
+        else
         {
-            totalCost += item.getGePrice();
-        }
+            collapseButton.setIcon(UNCOLLAPSED_ICON);
+            collapseButton.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseReleased(MouseEvent e)
+                {
+                    plugin.switchGroupCollapse(group);
+                }
 
-        if (totalCost != 0)
-        {
-            PurchaseProgressTotalPanel totalPanel = new PurchaseProgressTotalPanel(plugin.getValue(), totalCost, ColorScheme.DARK_GRAY_COLOR);
-            itemsPanel.add(createMarginWrapper(totalPanel), constraints);
-        }
+                @Override
+                public void mouseEntered(MouseEvent e)
+                {
+                    collapseButton.setIcon(UNCOLLAPSED_HOVER_ICON);
+                }
 
-        add(topPanel, BorderLayout.NORTH);
-        add(itemsPanel, BorderLayout.CENTER);
+                @Override
+                public void mouseExited(MouseEvent e)
+                {
+                    collapseButton.setIcon(UNCOLLAPSED_ICON);
+                }
+            });
+
+            leftActions.add(groupName, BorderLayout.EAST);
+            leftActions.add(collapseButton, BorderLayout.WEST);
+
+            topPanel.add(leftActions, BorderLayout.WEST);
+
+            // Actions Panel
+            JPanel rightActions = new JPanel(new BorderLayout());
+            rightActions.setBorder(new EmptyBorder(0, 0, 0, 5));
+            rightActions.setOpaque(false);
+
+            // Edit Button
+            JLabel edit = new JLabel("Edit");
+            edit.setVerticalAlignment(SwingConstants.CENTER);
+            edit.setBorder(new EmptyBorder(0, 0, 0, 0));
+            edit.setForeground(Color.LIGHT_GRAY);
+            edit.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseReleased(MouseEvent e)
+                {
+                    plugin.editGroup(group);
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e)
+                {
+                    edit.setForeground(Color.WHITE);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e)
+                {
+                    edit.setForeground(Color.LIGHT_GRAY);
+                }
+            });
+            rightActions.add(edit, BorderLayout.WEST);
+
+            // Empty panel to separate without causing extra hover
+            JPanel empty = new JPanel();
+            empty.setOpaque(false);
+            rightActions.add(empty, BorderLayout.CENTER);
+
+            JLabel addItem = new JLabel(ADD_ICON);
+            addItem.setOpaque(false);
+            addItem.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseReleased(MouseEvent e)
+                {
+                    final String[] itemNames = plugin.getItems().stream().map(PurchaseProgressItem::getName).toArray(String[]::new);
+                    Arrays.sort(itemNames, String.CASE_INSENSITIVE_ORDER);
+
+                    PurchaseProgressSelectionPanel selection = new PurchaseProgressSelectionPanel(panel, itemNames);
+                    selection.setOnOk(e1 -> {
+                        List<String> selectedItems = selection.getSelectedItems();
+                        if (!selectedItems.isEmpty())
+                        {
+                            plugin.addItemsToGroup(group, selectedItems);
+                        }
+                    });
+                    selection.show();
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e)
+                {
+                    addItem.setIcon(ADD_HOVER_ICON);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e)
+                {
+                    addItem.setIcon(ADD_ICON);
+                }
+            });
+            rightActions.add(addItem, BorderLayout.EAST);
+
+            topPanel.add(rightActions, BorderLayout.EAST);
+
+            // Group Items
+            GridBagConstraints constraints = new GridBagConstraints();
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            constraints.gridwidth = 1;
+            constraints.weightx = 1;
+            constraints.gridx = 0;
+            constraints.gridy = 1;
+
+            JPanel itemsPanel = new JPanel();
+            itemsPanel.setLayout(new GridBagLayout());
+            itemsPanel.setBorder(new EmptyBorder(5, 5, 0, 5));
+            itemsPanel.setOpaque(false);
+
+            int index = 0;
+            for (PurchaseProgressItem item : group.getItems())
+            {
+                PurchaseProgressGroupItemPanel itemPanel = new PurchaseProgressGroupItemPanel(plugin, group, item);
+
+                if (index++ > 0)
+                {
+                    itemsPanel.add(createMarginWrapper(itemPanel), constraints);
+                }
+                else
+                {
+                    itemsPanel.add(itemPanel, constraints);
+                }
+
+                constraints.gridy++;
+            }
+
+            // Bottom Panel
+            if (totalCost != 0)
+            {
+                PurchaseProgressTotalPanel totalPanel = new PurchaseProgressTotalPanel(plugin.getValue(), totalCost, ColorScheme.DARK_GRAY_COLOR);
+                itemsPanel.add(createMarginWrapper(totalPanel), constraints);
+            }
+
+            add(topPanel, BorderLayout.NORTH);
+            add(itemsPanel, BorderLayout.CENTER);
+        }
     }
 
     private boolean deleteConfirm()
@@ -250,5 +354,27 @@ public class PurchaseProgressGroupPanel extends JPanel
         marginWrapper.setBorder(new EmptyBorder(5, 0, 0, 0));
         marginWrapper.add(panel, BorderLayout.NORTH);
         return marginWrapper;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g)
+    {
+        if (collapsed)
+        {
+            g.setColor(new Color(12, 85, 35));
+            int greenWidth = (int) (this.getWidth() * percent / 100);
+            g.fillRect(0, 0, greenWidth, this.getHeight());
+
+            if (greenWidth != this.getWidth())
+            {
+                g.setColor(ColorScheme.DARKER_GRAY_COLOR);
+                g.fillRect(greenWidth, 0, this.getWidth() - greenWidth, this.getHeight());
+            }
+        }
+        else
+        {
+            g.setColor(ColorScheme.DARKER_GRAY_COLOR);
+            g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        }
     }
 }

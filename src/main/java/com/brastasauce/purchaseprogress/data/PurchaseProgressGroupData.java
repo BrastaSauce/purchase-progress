@@ -10,5 +10,6 @@ import java.util.List;
 public class PurchaseProgressGroupData
 {
     private String name;
+    private boolean collapsed;
     private List<Integer> items;
 }
