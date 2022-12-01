@@ -111,7 +111,7 @@ public class PurchaseProgressDataManager
             }
             catch (Exception e)
             {
-                log.error("Exception occurred while loading purchase progress groups");
+                log.error("Exception occurred while loading purchase progress groups", e);
                 plugin.setGroups(new ArrayList<>());
             }
         }
