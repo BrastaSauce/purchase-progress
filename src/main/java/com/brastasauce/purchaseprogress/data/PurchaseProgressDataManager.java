@@ -28,6 +28,8 @@ import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.AsyncBufferedImage;
@@ -47,6 +49,7 @@ public class PurchaseProgressDataManager
     private static final String CONFIG_KEY_GROUPS = "groups";
 
     private final PurchaseProgressPlugin plugin;
+    private final Client client;
     private final ConfigManager configManager;
     private final ItemManager itemManager;
     private final Gson gson;
@@ -58,16 +61,23 @@ public class PurchaseProgressDataManager
     private final Type groupsType = new TypeToken<ArrayList<PurchaseProgressGroupData>>(){}.getType();
 
     @Inject
-    public PurchaseProgressDataManager(PurchaseProgressPlugin plugin, ConfigManager configManager, ItemManager itemManager, Gson gson)
+    public PurchaseProgressDataManager(PurchaseProgressPlugin plugin, Client client, ConfigManager configManager, ItemManager itemManager, Gson gson)
     {
         this.plugin = plugin;
+        this.client = client;
         this.configManager = configManager;
         this.itemManager = itemManager;
         this.gson = gson;
     }
 
-    public void loadData()
+    public boolean loadData()
     {
+        // Load later if not at login screen to prevent data loss
+        if (client.getGameState().getState() < GameState.LOGIN_SCREEN.getState())
+        {
+            return false;
+        }
+
         // Value
         String value = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_VALUE);
         plugin.setValue(Long.parseLong(value));
@@ -115,6 +125,9 @@ public class PurchaseProgressDataManager
                 plugin.setGroups(new ArrayList<>());
             }
         }
+
+        plugin.updateItemPrices();
+        return true;
     }
 
     public void saveData()

@@ -362,13 +362,9 @@ public class PurchaseProgressPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
-		this.dataManager = new PurchaseProgressDataManager(this, configManager, itemManager, gson);
+		this.dataManager = new PurchaseProgressDataManager(this, client, configManager, itemManager, gson);
 
-		clientThread.invokeLater(() ->
-		{
-			dataManager.loadData();
-			updateItemPrices();
-		});
+		clientThread.invokeLater(() -> dataManager.loadData());
 	}
 
 	@Override
