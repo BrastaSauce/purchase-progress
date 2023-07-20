@@ -201,11 +201,13 @@ public class PurchaseProgressPlugin extends Plugin
 		});
 	}
 
-	public void removeGroup(PurchaseProgressGroup group)
+	public void removeGroup(PurchaseProgressGroup group, boolean removeItems)
 	{
 		clientThread.invokeLater(() -> {
-			// Move items out of group and delete
-			items.addAll(group.getItems());
+			if (!removeItems)
+			{
+				items.addAll(group.getItems());
+			}
 			groups.remove(group);
 			dataManager.saveData();
 			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());

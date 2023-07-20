@@ -57,7 +57,8 @@ import java.util.List;
 public class PurchaseProgressGroupPanel extends JPanel
 {
     private static final String DELETE_TITLE = "Warning";
-    private static final String DELETE_MESSAGE = "Are you sure you want to delete this progress group? This will not delete your items.";
+    private static final String DELETE_MESSAGE = "Are you sure you want to delete this progress group?";
+    private static final String DELETE_ITEMS_MESSAGE = "Would you like to delete the items too?";
     private static final ImageIcon ADD_ICON;
     private static final ImageIcon ADD_HOVER_ICON;
     private static final ImageIcon COLLAPSED_ICON;
@@ -142,7 +143,7 @@ public class PurchaseProgressGroupPanel extends JPanel
             {
                 if (deleteConfirm())
                 {
-                    plugin.removeGroup(group);
+                    plugin.removeGroup(group, deleteItemsConfirm());
                 }
             }
         });
@@ -372,6 +373,14 @@ public class PurchaseProgressGroupPanel extends JPanel
     {
         int confirm = JOptionPane.showConfirmDialog(this,
                 DELETE_MESSAGE, DELETE_TITLE, JOptionPane.YES_NO_OPTION);
+
+        return confirm == JOptionPane.YES_NO_OPTION;
+    }
+
+    private boolean deleteItemsConfirm()
+    {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                DELETE_ITEMS_MESSAGE, DELETE_TITLE, JOptionPane.YES_NO_OPTION);
 
         return confirm == JOptionPane.YES_NO_OPTION;
     }
