@@ -92,6 +92,9 @@ public class PurchaseProgressGroupPanel extends JPanel
         setBorder(new EmptyBorder(5, 5, 5, 0));
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
+        int groupIndex = plugin.getGroups().indexOf(group);
+        int groupsSize = plugin.getGroups().size();
+
         for (PurchaseProgressItem item : group.getItems())
         {
             totalCost += item.getGePrice();
@@ -104,7 +107,33 @@ public class PurchaseProgressGroupPanel extends JPanel
         topPanel.setOpaque(false);
 
         // Right click for deleting group
-        JPopupMenu deletePopup = new JPopupMenu();
+        JPopupMenu popup = new JPopupMenu();
+
+        JMenuItem moveUp = new JMenuItem(new AbstractAction("Move Up")
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if (groupIndex != 0)
+                {
+                    plugin.shiftGroup(groupIndex, true);
+                }
+            }
+        });
+        popup.add(moveUp);
+
+        JMenuItem moveDown = new JMenuItem(new AbstractAction("Move Down")
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if (groupIndex != groupsSize - 1)
+                {
+                    plugin.shiftGroup(groupIndex, false);
+                }
+            }
+        });
+        popup.add(moveDown);
 
         JMenuItem delete = new JMenuItem(new AbstractAction("Delete Group")
         {
@@ -117,7 +146,7 @@ public class PurchaseProgressGroupPanel extends JPanel
                 }
             }
         });
-        deletePopup.add(delete);
+        popup.add(delete);
 
         topPanel.addMouseListener(new MouseAdapter()
         {
@@ -126,7 +155,7 @@ public class PurchaseProgressGroupPanel extends JPanel
             {
                 if (SwingUtilities.isRightMouseButton(e))
                 {
-                    deletePopup.show(e.getComponent(), e.getX(), e.getY());
+                    popup.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
         });

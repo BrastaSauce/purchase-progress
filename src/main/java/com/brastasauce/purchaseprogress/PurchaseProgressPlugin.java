@@ -289,6 +289,27 @@ public class PurchaseProgressPlugin extends Plugin
 		});
 	}
 
+	public void shiftGroup(int groupIndex, boolean shiftUp)
+	{
+		clientThread.invokeLater(() -> {
+			PurchaseProgressGroup shiftedGroup = groups.get(groupIndex);
+
+			if (shiftUp)
+			{
+				groups.set(groupIndex, groups.get(groupIndex - 1));
+				groups.set(groupIndex - 1, shiftedGroup);
+			}
+			else
+			{
+				groups.set(groupIndex, groups.get(groupIndex + 1));
+				groups.set(groupIndex + 1, shiftedGroup);
+			}
+
+			dataManager.saveData();
+			SwingUtilities.invokeLater(() -> panel.updateProgressPanels());
+		});
+	}
+
 	public void shiftItem(int itemIndex, boolean shiftUp)
 	{
 		clientThread.invokeLater(() -> {
