@@ -58,6 +58,7 @@ public class PurchaseProgressGroupItemPanel extends JPanel
     private static final Dimension IMAGE_SIZE = new Dimension(32, 32);
 
     private float percent;
+    private int itemIndex;
 
     static
     {
@@ -79,7 +80,7 @@ public class PurchaseProgressGroupItemPanel extends JPanel
         setLayout(new BorderLayout(5, 0));
         setBorder(new EmptyBorder(5, 5, 5, 0));
 
-        int itemIndex = group.getItems().indexOf(item);
+        itemIndex = group.getItems().indexOf(item);
         int itemsSize = group.getItems().size();
 
         // Image
@@ -123,8 +124,11 @@ public class PurchaseProgressGroupItemPanel extends JPanel
         {
             percent = 100;
         }
-        progressLabel.setText(String.format("%.0f", percent) + "%");
-        rightPanel.add(progressLabel);
+        if (itemIndex == 0)
+        {
+            progressLabel.setText(String.format("%.0f", percent) + "%");
+            rightPanel.add(progressLabel);
+        }
 
         // Action Panel (Delete, Shift item)
         JPanel actionPanel = new JPanel(new BorderLayout());
@@ -254,8 +258,12 @@ public class PurchaseProgressGroupItemPanel extends JPanel
     @Override
     protected void paintComponent(Graphics g)
     {
+        int greenWidth = 0;
         g.setColor(new Color(12, 85, 35));
-        int greenWidth = (int) (this.getWidth() * percent / 100);
+        if(itemIndex == 0)
+        {
+            greenWidth = (int) (this.getWidth() * percent / 100);
+        }
         g.fillRect(0, 0, greenWidth, this.getHeight());
 
         if (greenWidth != this.getWidth())
