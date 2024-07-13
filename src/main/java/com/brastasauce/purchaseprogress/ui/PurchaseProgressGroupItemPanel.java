@@ -24,6 +24,7 @@
  */
 package com.brastasauce.purchaseprogress.ui;
 
+import com.brastasauce.purchaseprogress.PurchaseProgressConfig;
 import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressGroup;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
@@ -57,6 +58,8 @@ public class PurchaseProgressGroupItemPanel extends JPanel
     private static final ImageIcon SHIFT_DOWN_HOVER_ICON;
     private static final Dimension IMAGE_SIZE = new Dimension(32, 32);
 
+    private PurchaseProgressConfig config;
+
     private float percent;
     private int itemIndex;
 
@@ -75,8 +78,9 @@ public class PurchaseProgressGroupItemPanel extends JPanel
         SHIFT_DOWN_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(shiftDownImage, 0.53f));
     }
 
-    PurchaseProgressGroupItemPanel(PurchaseProgressPlugin plugin, PurchaseProgressGroup group, PurchaseProgressItem item)
+    PurchaseProgressGroupItemPanel(PurchaseProgressPlugin plugin, PurchaseProgressGroup group, PurchaseProgressItem item, PurchaseProgressConfig config)
     {
+        this.config = config;
         setLayout(new BorderLayout(5, 0));
         setBorder(new EmptyBorder(5, 5, 5, 0));
 
@@ -124,7 +128,7 @@ public class PurchaseProgressGroupItemPanel extends JPanel
         {
             percent = 100;
         }
-        if (itemIndex == 0)
+        if (!config.onlyTrackFirstItem() || itemIndex == 0)
         {
             progressLabel.setText(String.format("%.0f", percent) + "%");
             rightPanel.add(progressLabel);
@@ -260,7 +264,7 @@ public class PurchaseProgressGroupItemPanel extends JPanel
     {
         int greenWidth = 0;
         g.setColor(new Color(12, 85, 35));
-        if(itemIndex == 0)
+        if(!config.onlyTrackFirstItem() || itemIndex == 0)
         {
             greenWidth = (int) (this.getWidth() * percent / 100);
         }
