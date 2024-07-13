@@ -24,6 +24,7 @@
  */
 package com.brastasauce.purchaseprogress.ui;
 
+import com.brastasauce.purchaseprogress.PurchaseProgressConfig;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressGroup;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
 import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
@@ -89,6 +90,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     private final ClientThread clientThread;
     private final ItemManager itemManager;
     private final RuneLiteConfig runeLiteConfig;
+    private final PurchaseProgressConfig config;
 
     private final CardLayout centerCard = new CardLayout();
     private final CardLayout searchCard = new CardLayout();
@@ -133,13 +135,14 @@ public class PurchaseProgressPluginPanel extends PluginPanel
     }
 
     @Inject
-    PurchaseProgressPluginPanel(PurchaseProgressPlugin plugin, ClientThread clientThread, ItemManager itemManager, RuneLiteConfig runeLiteConfig)
+    PurchaseProgressPluginPanel(PurchaseProgressPlugin plugin, ClientThread clientThread, ItemManager itemManager, RuneLiteConfig runeLiteConfig, PurchaseProgressConfig config)
     {
         super(false);
         this.plugin = plugin;
         this.clientThread = clientThread;
         this.itemManager = itemManager;
         this.runeLiteConfig = runeLiteConfig;
+        this.config = config;
 
         setLayout(new BorderLayout());
 
@@ -454,7 +457,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         // Groups
         for (PurchaseProgressGroup group : plugin.getGroups())
         {
-            PurchaseProgressGroupPanel panel = new PurchaseProgressGroupPanel(plugin, this, group);
+            PurchaseProgressGroupPanel panel = new PurchaseProgressGroupPanel(plugin, this, group, config);
 
             if (index++ > 0)
             {
@@ -472,7 +475,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
         // Individual items
         for (PurchaseProgressItem item : plugin.getItems())
         {
-            PurchaseProgressItemPanel panel = new PurchaseProgressItemPanel(plugin, item);
+            PurchaseProgressItemPanel panel = new PurchaseProgressItemPanel(plugin, item, config);
 
             if (index++ > 0)
             {

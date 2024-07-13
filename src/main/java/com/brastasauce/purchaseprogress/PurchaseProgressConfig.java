@@ -54,4 +54,15 @@ public interface PurchaseProgressConfig extends Config
 	{
 		return 0;
 	}
+
+	@ConfigItem(
+			keyName = "onlyTrackFirstItem",
+			name = "Only Track First Item",
+			description = "Only displays progress for the first listed item.",
+			position = 2
+	)
+	default boolean onlyTrackFirstItem()
+	{
+		return false;
+	}
 }
