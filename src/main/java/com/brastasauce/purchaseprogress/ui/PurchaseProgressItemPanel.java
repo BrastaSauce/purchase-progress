@@ -24,6 +24,7 @@
  */
 package com.brastasauce.purchaseprogress.ui;
 
+import com.brastasauce.purchaseprogress.PurchaseProgressConfig;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
 import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
 import net.runelite.client.ui.ColorScheme;
@@ -56,7 +57,10 @@ public class PurchaseProgressItemPanel extends JPanel
     private static final ImageIcon SHIFT_DOWN_HOVER_ICON;
     private static final Dimension IMAGE_SIZE = new Dimension(32, 32);
 
+    private PurchaseProgressConfig config;
+
     private float percent;
+    private int itemIndex;
 
     static
     {
@@ -73,12 +77,13 @@ public class PurchaseProgressItemPanel extends JPanel
         SHIFT_DOWN_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(shiftDownImage, 0.53f));
     }
 
-    PurchaseProgressItemPanel(PurchaseProgressPlugin plugin, PurchaseProgressItem item)
+    PurchaseProgressItemPanel(PurchaseProgressPlugin plugin, PurchaseProgressItem item, PurchaseProgressConfig config)
     {
+        this.config = config;
         setLayout(new BorderLayout(5, 0));
         setBorder(new EmptyBorder(5, 5, 5, 0));
 
-        int itemIndex = plugin.getItems().indexOf(item);
+        itemIndex = plugin.getItems().indexOf(item);
         int itemsSize = plugin.getItems().size();
 
         // Image
@@ -122,8 +127,11 @@ public class PurchaseProgressItemPanel extends JPanel
         {
             percent = 100;
         }
-        progressLabel.setText(String.format("%.0f", percent) + "%");
-        rightPanel.add(progressLabel);
+        if (!config.onlyTrackFirstItem() || itemIndex == 0)
+        {
+            progressLabel.setText(String.format("%.0f", percent) + "%");
+            rightPanel.add(progressLabel);
+        }
 
         // Action Panel (Delete, Shift item)
         JPanel actionPanel = new JPanel(new BorderLayout());
@@ -245,7 +253,7 @@ public class PurchaseProgressItemPanel extends JPanel
     private boolean deleteConfirm()
     {
         int confirm = JOptionPane.showConfirmDialog(this,
-                        DELETE_MESSAGE, DELETE_TITLE, JOptionPane.YES_NO_OPTION);
+                DELETE_MESSAGE, DELETE_TITLE, JOptionPane.YES_NO_OPTION);
 
         return confirm == JOptionPane.YES_NO_OPTION;
     }
@@ -253,14 +261,19 @@ public class PurchaseProgressItemPanel extends JPanel
     @Override
     protected void paintComponent(Graphics g)
     {
+        int greenWidth = 0;
         g.setColor(new Color(12, 85, 35));
-        int greenWidth = (int) (this.getWidth() * percent / 100);
+        if(!config.onlyTrackFirstItem() || itemIndex == 0)
+        {
+            greenWidth = (int) (this.getWidth() * percent / 100);
+        }
         g.fillRect(0, 0, greenWidth, this.getHeight());
 
         if (greenWidth != this.getWidth())
         {
             g.setColor(ColorScheme.DARKER_GRAY_COLOR);
             g.fillRect(greenWidth, 0, this.getWidth() - greenWidth, this.getHeight());
+
         }
     }
 }

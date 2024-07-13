@@ -24,6 +24,7 @@
  */
 package com.brastasauce.purchaseprogress.ui;
 
+import com.brastasauce.purchaseprogress.PurchaseProgressConfig;
 import com.brastasauce.purchaseprogress.PurchaseProgressPlugin;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressGroup;
 import com.brastasauce.purchaseprogress.data.PurchaseProgressItem;
@@ -87,7 +88,7 @@ public class PurchaseProgressGroupPanel extends JPanel
         UNCOLLAPSED_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(uncollapsedImage, 0.53f));
     }
 
-    PurchaseProgressGroupPanel(PurchaseProgressPlugin plugin, PurchaseProgressPluginPanel panel, PurchaseProgressGroup group)
+    PurchaseProgressGroupPanel(PurchaseProgressPlugin plugin, PurchaseProgressPluginPanel panel, PurchaseProgressGroup group, PurchaseProgressConfig config)
     {
         setLayout(new BorderLayout(5, 0));
         setBorder(new EmptyBorder(5, 5, 5, 0));
@@ -343,7 +344,7 @@ public class PurchaseProgressGroupPanel extends JPanel
             int index = 0;
             for (PurchaseProgressItem item : group.getItems())
             {
-                PurchaseProgressGroupItemPanel itemPanel = new PurchaseProgressGroupItemPanel(plugin, group, item);
+                PurchaseProgressGroupItemPanel itemPanel = new PurchaseProgressGroupItemPanel(plugin, group, item, config);
 
                 if (index++ > 0)
                 {
