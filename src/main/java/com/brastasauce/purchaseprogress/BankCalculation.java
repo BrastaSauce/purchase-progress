@@ -26,11 +26,11 @@ package com.brastasauce.purchaseprogress;
 
 import com.google.common.collect.ImmutableList;
 import net.runelite.api.Client;
-import net.runelite.api.InventoryID;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
-import net.runelite.api.Varbits;
+import net.runelite.api.gameval.ItemID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.game.ItemManager;
 
 import javax.inject.Inject;
@@ -45,15 +45,15 @@ public class BankCalculation
     private Long bankValue;
 
     private static final List<Integer> TAB_VARBITS = ImmutableList.of(
-            Varbits.BANK_TAB_ONE_COUNT,
-            Varbits.BANK_TAB_TWO_COUNT,
-            Varbits.BANK_TAB_THREE_COUNT,
-            Varbits.BANK_TAB_FOUR_COUNT,
-            Varbits.BANK_TAB_FIVE_COUNT,
-            Varbits.BANK_TAB_SIX_COUNT,
-            Varbits.BANK_TAB_SEVEN_COUNT,
-            Varbits.BANK_TAB_EIGHT_COUNT,
-            Varbits.BANK_TAB_NINE_COUNT
+            VarbitID.BANK_TAB_1,
+            VarbitID.BANK_TAB_2,
+            VarbitID.BANK_TAB_3,
+            VarbitID.BANK_TAB_4,
+            VarbitID.BANK_TAB_5,
+            VarbitID.BANK_TAB_6,
+            VarbitID.BANK_TAB_7,
+            VarbitID.BANK_TAB_8,
+            VarbitID.BANK_TAB_9
     );
 
     @Inject
@@ -69,14 +69,14 @@ public class BankCalculation
     {
         long value = 0;
 
-        final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+        final ItemContainer inventory = client.getItemContainer(InventoryID.INV);
         final ItemContainer bank = client.getItemContainer(InventoryID.BANK);
 
         // Add inventory GP/tokens
         if (inventory != null)
         {
-            value += inventory.count(ItemID.COINS_995);
-            value += inventory.count(ItemID.PLATINUM_TOKEN) * 1000L;
+            value += inventory.count(ItemID.COINS);
+            value += inventory.count(ItemID.PLATINUM) * 1000L;
         }
 
         if (bank == null)
@@ -85,8 +85,8 @@ public class BankCalculation
         }
 
         // Add bank GP/tokens
-        value += bank.count(ItemID.COINS_995);
-        value += bank.count(ItemID.PLATINUM_TOKEN) * 1000L;
+        value += bank.count(ItemID.COINS);
+        value += bank.count(ItemID.PLATINUM) * 1000L;
 
         // Add loot tab value if selected
         if (!config.includeBankTab())
@@ -141,9 +141,9 @@ public class BankCalculation
 
             switch (id)
             {
-                case ItemID.COINS_995:
+                case ItemID.COINS:
                     break; // Inventory and Bank coins already calculated
-                case ItemID.PLATINUM_TOKEN:
+                case ItemID.PLATINUM:
                     break; // Inventory and Bank tokens already calculated
                 default:
                     value += (long) itemManager.getItemPrice(id) * qty;

@@ -415,7 +415,7 @@ public class PurchaseProgressPluginPanel extends PluginPanel
 
             int itemId = item.getId();
             AsyncBufferedImage itemImage = itemManager.getImage(itemId);
-            int itemPrice = useActivelyTradedPrice ? itemManager.getWikiPrice(item) : item.getPrice();
+            long itemPrice = useActivelyTradedPrice ? itemManager.getWikiPrice(item) : item.getPrice();
             searchItems.add(new PurchaseProgressItem(itemImage, item.getName(), itemId, itemPrice));
         }
 

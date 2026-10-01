@@ -43,7 +43,7 @@ public class PurchaseProgressItem implements Comparable<PurchaseProgressItem>
 
     @Getter
     @Setter
-    private int gePrice;
+    private long gePrice;
 
     @Override
     public boolean equals(Object obj)
@@ -60,6 +60,6 @@ public class PurchaseProgressItem implements Comparable<PurchaseProgressItem>
     @Override
     public int compareTo(PurchaseProgressItem other)
     {
-        return Integer.compare(gePrice, other.getGePrice());
+        return Long.compare(gePrice, other.getGePrice());
     }
 }
