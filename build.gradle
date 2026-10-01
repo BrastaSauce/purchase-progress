@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = 'purchaseprogress'
-version = 'v1.2.2'
+version = 'v1.2.3'
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
